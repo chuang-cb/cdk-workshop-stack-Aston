@@ -1,19 +1,25 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import { Construct } from 'constructs';
+import * as cdk from "aws-cdk-lib";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
+import { GW_SNS } from "./gw_SNS";
+import { S3_SNS } from "./s3_SNS";
 
-export class CdkWorkshopStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+export class CdkWorkshopStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    const queue = new sqs.Queue(this, 'CdkWorkshopQueue', {
-      visibilityTimeout: Duration.seconds(300)
+    const snsTopic = new sns.Topic(this, "AstonTopic", {
+      displayName: "AstonEmailTopic",
     });
+    const subscription = new subs.EmailSubscription(
+      "chuang.cb@om.asahi-kasei.co.jp"
+    );
+    snsTopic.addSubscription(subscription);
 
-    const topic = new sns.Topic(this, 'CdkWorkshopTopic');
-
-    topic.addSubscription(new subs.SqsSubscription(queue));
+    new S3_SNS(this, "AstonS3_SNS", {
+      downstream: snsTopic,
+    });
+    new GW_SNS(this, "AstonGW_SNS", {
+      downstream: snsTopic,
+    });
   }
 }
