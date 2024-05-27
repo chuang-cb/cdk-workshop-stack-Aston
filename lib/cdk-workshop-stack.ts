@@ -10,9 +10,7 @@ export class CdkWorkshopStack extends cdk.Stack {
     const snsTopic = new sns.Topic(this, "AstonTopic", {
       displayName: "AstonEmailTopic",
     });
-    const subscription = new subs.EmailSubscription(
-      "chuang.cb@om.asahi-kasei.co.jp"
-    );
+    const subscription = new subs.EmailSubscription("your email");
     snsTopic.addSubscription(subscription);
 
     new S3_SNS(this, "AstonS3_SNS", {
